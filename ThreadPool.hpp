@@ -76,6 +76,7 @@ public:
         return task_queue.size() == 0 ? true : false;
     }
 
+    // 线程执行函数
     static void* ThreadRoutine(void* args)
     {
         ThreadPool* tp = (ThreadPool*)args;
@@ -88,8 +89,11 @@ public:
                 tp->ThreadWait();
             }
 
+            // 满足条件
             tp->PopTask(task);
             tp->UnLock();
+            
+            // 处理任务
             task.ProcessOn();
         }
     }

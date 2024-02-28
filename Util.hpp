@@ -13,6 +13,8 @@ public:
     {
         // 统一转化成按照 \n 结尾
         char ch = 'X';
+        
+        // 每次读一个字符，直到读到空行为止
         while (ch != '\n')
         {
             ssize_t s = recv(sock, &ch, 1, 0);
@@ -20,7 +22,9 @@ public:
             {
                 if (ch == '\r')
                 {
-                    // \r\n -> \n
+                    // \r\n => \n
+
+                    // MSG_PEEK：允许查看下一个字符而不从缓冲区中移除它
                     recv(sock, &ch, 1, MSG_PEEK);
                     if (ch == '\n')
                     {
@@ -45,7 +49,7 @@ public:
                 return -1;
             }
         }
-
+        
         return out.size();
     }
 

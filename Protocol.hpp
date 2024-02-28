@@ -30,6 +30,7 @@
 #define BAD_REQUEST 400
 #define SERVER_ERROR 500
 
+// 状态码 => 状态码描述
 static std::string Code2Desc(int code)
 {
     std::string desc;
@@ -49,7 +50,7 @@ static std::string Code2Desc(int code)
 
 static std::string SuffixToDesc(std::string &suffix)
 {
-    // 后缀 --> 描述
+    // 后缀 => 描述
     static std::unordered_map<std::string, std::string> suffixtodesc = {
         {".html", "text/html"},
         {".css", "text/css"},

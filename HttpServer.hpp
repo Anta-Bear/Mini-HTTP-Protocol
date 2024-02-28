@@ -13,40 +13,40 @@
 
 class HttpServer
 {
-    private:
-        int _port;
-        bool _stop;
-    public:
-        HttpServer(int port = DEAFULT_PORT) :_port(port), _stop(false) 
-        {}
+private:
+    int _port;
+    bool _stop;
 
-        void InitServer()
+public:
+    HttpServer(int port = DEAFULT_PORT) : _port(port), _stop(false)
+    {
+    }
+
+    void InitServer()
+    {
+        // SIGPIPE 信号需要忽略，如果不忽略，在写入的时候，可能导致 server 直接崩溃
+        signal(SIGPIPE, SIG_IGN);
+        // _tcp_Server = TcpServer::getInstance(_port);
+    }
+
+    // 直接把 accept 上来的链接交给后端的线程池处理
+    void Loop()
+    {
+        TcpServer *tsvr = TcpServer::getInstance(_port);
+        ThreadPool *tp = ThreadPool::GetInstance();
+        LOG(INFO, "loop begin...");
+        while (!_stop)
         {
-            // SIGPIPE 信号需要忽略，如果不忽略，在写入的时候，可能导致 server 直接崩溃
-            signal(SIGPIPE, SIG_IGN); 
-            // _tcp_Server = TcpServer::getInstance(_port);
-        }
+            struct sockaddr_in peer;
+            socklen_t len = sizeof(peer);
+            int sock = accept(tsvr->Sock(), (struct sockaddr *)&peer, &len);
+            if (sock < 0) continue;
 
-        void Loop()
-        {
-            TcpServer* tsvr = TcpServer::getInstance(_port);
-            ThreadPool* tp = ThreadPool::GetInstance();
-            LOG(INFO, "loop begin...");
-            while (!_stop) {
-                struct sockaddr_in peer;
-                socklen_t len = sizeof(peer);
-                int sock = accept(tsvr->Sock(), (struct sockaddr*)&peer, &len);
-                if (sock < 0) {
-                    continue;
-                }
-                LOG(INFO, "Get a new link ...");
-                Task task(sock);
-                tp->PushTask(task);   
-            }
+            LOG(INFO, "Get a new link ...");
+            Task task(sock);
+            tp->PushTask(task);
         }
-
-        ~HttpServer()
-        {}
+    }
 };
 
 #endif
